@@ -1,0 +1,12 @@
+int CujoCloudConnectivity(char const* str);
+int CujoAgentProcessStatus(char const* str);
+int CcspAdvsecProcessStatus(char const* str);
+int CcspAdvsecFeatureTr181(char const* str);
+int CcspAdvSecAgentStatus(const char* commands[], int numCommands);
+int executeAndCheck(const char *command, const char *expected);
+int CcspAdvSecAgent_SetToTrue(const char* commands[]);
+int AdvSecSafeBrowsing_SetToTrue(const char* commands[]);
+int AdvSecCujoTelemetryWiFiFP_SetToTrue(const char* commands[]);
+int AdvSecCujoTelemetryWiFiFP_SetToFalse(const char* commands[]);
+int AdvSecSafeBrowsing_SetToFalse(const char* commands[]);
+int CcspAdvSecAgent_SetToFalse(const char* commands[]);

@@ -1,0 +1,32 @@
+From 7c2f2c27950d1a8f25eb03e58645c705a9ce320d Mon Sep 17 00:00:00 2001
+From: "Vivek.A" <Vivek_Arumugam@comcast.com>
+Date: Mon, 23 Jan 2023 09:00:04 +0000
+Subject: [PATCH] DELIA-59848: Gensmak app launch ends up in APPS-04035 error
+
+Reason for change: A failed resource loda from a child page
+from the app results in maintenance of incorrect http status code
+value in WebKitImplementation (as code is read on every policy decision
+callback, irrespective of the source frame i.e main frame or not)...
+Test Procedure: None
+Priority: P1
+Risks: None
+
+Signed-off-by: Vivek.A <vivek_arumugam@comcast.com>
+---
+ WebKitBrowser/WebKitImplementation.cpp | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/WebKitBrowser/WebKitImplementation.cpp b/WebKitBrowser/WebKitImplementation.cpp
+index 8e373ef32..6d2622c38 100644
+--- a/WebKitBrowser/WebKitImplementation.cpp
++++ b/WebKitBrowser/WebKitImplementation.cpp
+@@ -2537,7 +2537,8 @@ static GSourceFuncs _handlerIntervention =
+         {
+             if (type == WEBKIT_POLICY_DECISION_TYPE_RESPONSE) {
+                 auto *response = webkit_response_policy_decision_get_response(WEBKIT_RESPONSE_POLICY_DECISION(decision));
+-                browser->SetResponseHTTPStatusCode(webkit_uri_response_get_status_code(response));
++                if (webkit_uri_response_is_main_frame(response))
++                    browser->SetResponseHTTPStatusCode(webkit_uri_response_get_status_code(response));
+             }
+             webkit_policy_decision_use(decision);
+             return TRUE;

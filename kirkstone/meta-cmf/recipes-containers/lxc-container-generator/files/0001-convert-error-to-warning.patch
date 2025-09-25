@@ -1,0 +1,37 @@
+Date: Tue, 14 May 2019 14:23:58 -0400
+
+From: afe060dcb14a2f7edb51be75faef11c47f65f89e Mon Sep 17 00:00:00 2001
+Source: COMCAST
+Upstream-Status: N/A
+Subject: [PATCH] DELIA-31917: Converted Error to Warning.
+
+        1)we need to provide a way to share complete
+        directories till we have the functionality working.
+        There has to be a way provided in the framework for it.
+        At this point it is missing hence  we are patching to
+        allow it for now till there is a new change in framework.
+        2)Refactoring LXC patches to comcast layer.
+        3)Using weak assignment baseline LXC version to may 14,2019 CMF version
+
+Signed-off-by: Balaji Punnuru <balaji_punnuru@cable.comcast.com>
+---
+
+ src/lib/rootfs.py | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/src/lib/rootfs.py b/src/lib/rootfs.py
+index 7e60927..6ae1af9 100644
+--- a/src/lib/rootfs.py
++++ b/src/lib/rootfs.py
+@@ -372,8 +372,7 @@ class cRootfs(object):
+                         # Library doen't exists in rootfs but referenced by LD_PRELOAD
+                         self.log_warn("%s library doesn't exists. required for: %s"%(name," ".join(lib["required_by"])))
+                     else:
+-                        self.log_err("%s library missing. required for: %s"%(name," ".join(lib["required_by"])))
+-                        wasError = True
++                        self.log_warn("%s library missing. required for: %s"%(name," ".join(lib["required_by"])))
+         return wasError
+ 
+ ################################################################################
+-- 
+2.1.4

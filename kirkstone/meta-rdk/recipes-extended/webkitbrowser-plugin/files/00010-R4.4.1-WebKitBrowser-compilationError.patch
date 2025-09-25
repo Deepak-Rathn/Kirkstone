@@ -1,0 +1,14 @@
+diff --git a/WebKitBrowser/Extension/main.cpp b/WebKitBrowser/Extension/main.cpp
+index 5adf09e0..593e2c4f 100644
+--- a/WebKitBrowser/Extension/main.cpp
++++ b/WebKitBrowser/Extension/main.cpp
+@@ -78,7 +78,9 @@ public:
+         : _engine(Core::ProxyType<RPC::InvokeServerType<2, 0, 4>>::Create())
+         , _comClient(Core::ProxyType<RPC::CommunicatorClient>::Create(GetConnectionNode(), Core::ProxyType<Core::IIPCServer>(_engine)))
+     {
++#ifndef USE_THUNDER_R4_4
+         _engine->Announcements(_comClient->Announcement());
++#endif
+     }
+     ~PluginHost()
+     {

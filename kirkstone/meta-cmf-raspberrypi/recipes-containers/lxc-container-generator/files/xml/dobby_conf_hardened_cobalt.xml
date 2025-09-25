@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<CONTAINER SandboxName="cobalt" Type="dobby">
+    <LxcParams>
+        <!-- This will be overridden by Thunder -->
+        <ExecName>true</ExecName>
+    </LxcParams>
+    <LxcConfig>
+        <UserName>cobalt</UserName>
+        <GroupName>dobbyapp</GroupName>
+        <AdditionalGroups>
+            <GroupName>video</GroupName>
+	    <GroupName>audio</GroupName>
+        </AdditionalGroups>
+        <CapKeep>audit_write kill net_bind_service</CapKeep>
+        <ResourceLimits>
+            <Limit type="RLIMIT_NOFILE" hard="1024" soft="1024" />
+            <Limit type="RLIMIT_NPROC" hard="300" soft="300" />
+            <Limit type="RLIMIT_RTPRIO" hard="0" soft="0" />
+        </ResourceLimits>
+	<Network type="nat">
+            <IPv6 enable="true"/>
+            <IPv4 enable="true"/>
+            <DNSMasq enable="true"/>
+        </Network>
+        <Dbus enable="true"></Dbus>
+        <Logging type="journald">
+            <Priority>LOG_INFO</Priority>
+        </Logging>
+	<Minidump enable="true" path="/opt/secure/minidumps" />
+	<Environment>
+		<Variable>XDG_RUNTIME_DIR=/tmp</Variable>
+		<Variable>LD_PRELOAD=libwayland-client.so.0:libwayland-egl.so.1</Variable>
+		<Variable>PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin</Variable>
+		<Variable>GST_VIRTUAL_DISP_WIDTH=1920</Variable>
+		<Variable>GST_VIRTUAL_DISP_HEIGHT=1080</Variable>
+		<Variable>GST_VIRTUAL_SD_DISP_WIDTH=1920</Variable>
+		<Variable>GST_VIRTUAL_SD_DISP_HEIGHT=1080</Variable>
+		<Variable>AAMP_ENABLE_AUDIO_DESC=true</Variable>
+		<Variable>do_not_change_display=true</Variable>
+		<Variable>SAGEBIN_PATH=/usr/bin/</Variable>
+		<Variable>LD_LIBRARY_PATH=/usr/lib:/usr/lib/wpeframework/plugins</Variable>
+		<Variable>TRACE_FILENAME=/tmp/tracebuffer</Variable>
+		<Variable>TRACE_DOORBELL=/tmp/tracebuffer.doorbell</Variable>
+		<Variable>WARNINGREPORTING_FILENAME=/tmp/warningreportingbuffer</Variable>
+		<Variable>WARNINGREPORTING_DOORBELL=/tmp/warningreportingbuffer.doorbell</Variable>
+	</Environment>
+	<SeccompProfile>cobaltSeccompProfile</SeccompProfile>
+	<CGroupSettings>
+		<!--300MB-->
+		<MemoryLimit>314572800</MemoryLimit>
+		<!--200M-->
+		<GpuMemoryLimit>209715200</GpuMemoryLimit>
+		<DeviceCgroup>
+			<DevicesAllow name="/dev/dri/card0">c 226:0 rw</DevicesAllow>
+			<DevicesAllow name="/dev/video10">c 81:4 rw</DevicesAllow>
+                        <DevicesAllow name="/dev/video11">c 81:1 rw</DevicesAllow>
+                        <DevicesAllow name="/dev/video12">c 81:5 rw</DevicesAllow>
+                        <DevicesAllow name="/dev/video13">c 81:0 rw</DevicesAllow>
+                        <DevicesAllow name="/dev/video14">c 81:3 rw</DevicesAllow>
+                        <DevicesAllow name="/dev/video15">c 81:2 rw</DevicesAllow>
+                        <DevicesAllow name="/dev/video16">c 81:6 rw</DevicesAllow>
+                        <DevicesAllow name="/dev/snd/controlC0">c 116:0 rw</DevicesAllow> 
+                        <DevicesAllow name="/dev/snd/controlC1">c 116:32 rw</DevicesAllow> 
+                        <DevicesAllow name="/dev/snd/seq">c 116:1 rw</DevicesAllow> 
+                        <DevicesAllow name="/dev/snd/pcmC0D0p">c 116:16 rw</DevicesAllow> 
+                        <DevicesAllow name="/dev/snd/pcmC1D0p">c 116:48 rw</DevicesAllow>  
+                        <DevicesAllow name="/dev/snd/timer">c 116:33 rw</DevicesAllow> 
+		</DeviceCgroup>
+		 <!-- Devices where the major/minor IDs may change -->
+                <DynamicDevices>
+			<Device name="/dev/video10" />
+			<Device name="/dev/video11" />
+                        <Device name="/dev/video12" />
+                        <Device name="/dev/video13" />
+                        <Device name="/dev/video14" />
+			<Device name="/dev/video15" />  
+	                <Device name="/dev/video16" />		
+                </DynamicDevices>
+	</CGroupSettings>
+	<Rootfs create="yes">
+		<MountPoints>
+			<Entry type="dir">
+				<Source>proc</Source>
+				<Destination>/proc</Destination>
+				<FsType>proc</FsType>
+				<Options>nosuid,noexec,nodev</Options>
+			</Entry>
+			<Entry type="dir">
+				<Source>tmpfs</Source>
+				<Destination>/dev</Destination>
+				<FsType>tmpfs</FsType>
+				<Options>nosuid,strictatime,mode=0700,size=65536k</Options>
+			</Entry>
+			<Entry type="dir">
+				<Source>devpts</Source>
+				<Destination>/dev/pts</Destination>
+				<FsType>devpts</FsType>
+				<Options>nosuid,noexec,newinstance,ptmxmode=0666,mode=0620</Options>
+			</Entry>
+			<Entry type="dir">
+				<Source>shm</Source>
+				<Destination>/dev/shm</Destination>
+				<FsType>tmpfs</FsType>
+				<Options>nosuid,noexec,nodev,mode=1777,nr_inodes=8k</Options>
+			</Entry>
+			<Entry type="dir">
+				<Source>sysfs</Source>
+				<Destination>/sys</Destination>
+				<FsType>sysfs</FsType>
+				<Options>nosuid,noexec,nodev,ro</Options>
+			</Entry>
+			<Entry type="dir">
+				<Source>cgroup</Source>
+				<Destination>/sys/fs/cgroup</Destination>
+				<FsType>cgroup</FsType>
+				<Options>nosuid,noexec,nodev,relatime</Options>
+			</Entry>
+			<Entry type="dir">
+				<Source>tmpfs</Source>
+				<Destination>tmp</Destination>
+				<FsType>tmpfs</FsType>
+				<Options>nosuid,noexec,nodev,mode=0700,size=65536k,nr_inodes=8k</Options>
+			</Entry>
+			<Entry type="dir">
+				<Source>/usr/lib/wpeframework/plugins</Source>
+				<Destination>/usr/lib/wpeframework/plugins</Destination>
+				<Options>rbind,nosuid,nodev,ro</Options>
+			</Entry>
+			<Entry type="dir">
+                                <Source>/usr/lib/wpeframework/proxystubs</Source>
+                                <Destination>/usr/lib/wpeframework/proxystubs</Destination>
+                                <Options>rbind,nosuid,nodev,ro</Options>
+			</Entry>
+                        <Entry type="dir">
+                                <Source>/usr/share/X11/xkb</Source>
+                                <Destination>/usr/share/X11/xkb</Destination>
+                                <Options>rbind,nosuid,nodev,ro</Options>
+			</Entry>
+                        <Entry type="dir">
+                                <Source>/usr/share/content/data</Source>
+                                <Destination>/usr/share/content/data</Destination>
+                                <Options>rbind,nosuid,nodev,ro</Options>
+			</Entry>			
+                        <Entry type="dir">
+                                <Source>/usr/share/ca-certificates</Source>
+                                <Destination>/usr/share/ca-certificates</Destination>
+                                <Options>rbind,nosuid,nodev,ro</Options>
+			</Entry>
+                        <Entry type="dir">
+				<Source>/usr/share/alsa</Source>
+                                <Destination>/usr/share/alsa</Destination>
+                                <Options>rbind,nosuid,nodev,ro</Options>
+			</Entry>			
+                        <Entry type="dir">
+                                <Source>/usr/share/xdial</Source>
+                                <Destination>/usr/share/xdial</Destination>
+                                <Options>rbind,nosuid,nodev,ro</Options>
+                        </Entry>			
+			<Entry type="file">
+                                <Source>/usr/bin/WPEProcess</Source>
+                                <Destination>/usr/bin/WPEProcess</Destination>
+                                <Options>rbind,nosuid,nodev,ro</Options>
+			</Entry>
+			<Entry type="file">
+                                <Source>/usr/libexec/DobbyInit</Source>
+                                <Destination>/usr/libexec/DobbyInit</Destination>
+                                <Options>rbind,nosuid,nodev,ro</Options>
+			</Entry>
+                        <Entry type="file">
+                                <Source>/usr/lib/dri/vc4_dri.so</Source>
+                                <Destination>/usr/lib/dri/vc4_dri.so</Destination>
+                                <Options>rbind,nosuid,nodev,ro</Options>
+                        </Entry>			
+			<Entry type="dir">
+				<Source>/opt/secure/minidumps</Source>
+				<Destination>/opt/secure/minidumps</Destination>
+				<Options>bind,rw,nosuid,nodev,noexec</Options>
+			</Entry>
+			<Entry type="dir">
+				<Source>/etc/ssl/certs</Source>
+				<Destination>/etc/ssl/certs</Destination>
+				<Options>bind,ro,nosuid,nodev,noexec</Options>
+			</Entry>
+			<Entry type="dir">
+				<Source>/tmp/Cobalt/</Source>
+				<Destination>/tmp/Cobalt</Destination>
+				<Options>bind,nosuid,nodev,ro</Options>					
+			</Entry>
+			<Entry type="file">
+				<Source>/tmp/communicator</Source>
+				<Destination>/tmp/communicator</Destination>
+				<Options>bind,nosuid,nodev,noexec</Options>
+			</Entry>
+			<Entry type="file">
+                                <Source>/tmp/rdkshell_display</Source>
+                                <Destination>/tmp/rdkshell_display</Destination>
+                                <Options>bind,rw,nosuid,nodev,noexec</Options>
+			</Entry>
+			<Entry type="file">
+                                <Source>/tmp/video</Source>
+				<Destination>/tmp/video</Destination>
+                                <Options>bind,rw,nosuid,nodev,noexec</Options>
+                            </Entry>
+			<Entry type="dir">
+				<Source>/etc/fonts</Source>
+				<Destination>/etc/fonts</Destination>
+				<Options>bind,nosuid,nodev,ro</Options>					
+			</Entry>
+		</MountPoints>
+                <LibsRoBindMounts>    
+			<Entry>libasound</Entry>
+			<Entry>libwesteros_compositor</Entry>
+			<Entry>libgstcodecparsers</Entry>
+			<Entry>libessosrmgr</Entry>
+			<Entry>libwesteros_simplebuffer_server</Entry>
+			<Entry>libbz2</Entry>
+			<Entry>libwesteros_simpleshell_server</Entry>
+			<Entry>libwesteros_simplebuffer_client</Entry>
+			<Entry>libgstallocators</Entry>
+			<Entry>libsafec</Entry>
+			<Entry>liblog4c</Entry>
+			<Entry>libidn2</Entry>
+			<Entry>librdkloggers</Entry>
+			<Entry>libcjson</Entry>
+			<Entry>libcurl</Entry>
+			<Entry>libcrypto</Entry>
+			<Entry>libssl</Entry>
+			<Entry>libpcre</Entry>
+			<Entry>libffi</Entry>
+			<Entry>libgmodule</Entry>
+			<Entry>liborc</Entry>
+			<Entry>libgsttag</Entry>
+			<Entry>libwesteros_simpleshell_client</Entry>
+			<Entry>libwesteros_gl</Entry>
+			<Entry>libxkbcommon</Entry>
+			<Entry>libwayland-egl</Entry>
+			<Entry>libwayland-server</Entry>
+			<Entry>libwayland-client</Entry>
+			<Entry>libdrm</Entry>
+			<Entry>libexpat</Entry>
+			<Entry>libglapi</Entry>
+			<Entry>libgbm</Entry>
+			<Entry>libatomic</Entry>
+			<Entry>libocdm</Entry>
+			<Entry>librfcapi</Entry>
+			<Entry>libWPEFrameworkCryptography</Entry>
+			<Entry>libsecurityagent</Entry>
+			<Entry>libWPEFrameworkWebSocket</Entry>
+			<Entry>libWPEFrameworkDefinitions</Entry>
+			<Entry>libglib</Entry>
+			<Entry>libgobject</Entry>
+			<Entry>libgstreamer</Entry>
+			<Entry>libgstbase</Entry>
+			<Entry>libgstvideo</Entry>
+			<Entry>libgstaudio</Entry>
+			<Entry>libgstpbutils</Entry>
+			<Entry>libgstapp</Entry>
+			<Entry>libessos</Entry>
+			<Entry>libGLESv2</Entry>
+			<Entry>libEGL</Entry>
+			<Entry>libcobalt</Entry>
+			<Entry>libbreakpadwrapper</Entry>
+			<Entry>liblzma</Entry>
+			<Entry>libWPEFrameworkProcessContainers</Entry>
+			<Entry>libstdc++</Entry>
+			<Entry>libWPEFrameworkCore</Entry>
+			<Entry>libWPEFrameworkTracing</Entry>
+			<Entry>libWPEFrameworkProtocols</Entry>
+			<Entry>libWPEFrameworkWarningReporting</Entry>
+			<Entry>libWPEFrameworkPlugins</Entry>
+			<Entry>libWPEFrameworkCryptalgo</Entry>
+			<Entry>libgudev-1.0</Entry>
+			<Entry>libcrashlog</Entry>
+			<Entry>libgstvideoparsersbad</Entry>
+			<Entry>libgstaudioparsers</Entry>
+			<Entry>libgstapp</Entry>
+			<Entry>libgstcoreelements</Entry>
+			<Entry>libgstalsa</Entry>
+			<Entry>libgstaudioresample</Entry>
+			<Entry>libgstaudioconvert</Entry>
+			<Entry>libgstvolume</Entry>
+			<Entry>libgstwesterossink</Entry>
+			<Entry>libgstplayback</Entry>
+			<Entry>libgstlibav</Entry>				
+			<Entry>libpthread</Entry>
+			<Entry>libresolv</Entry>
+			<Entry>libnss_dns</Entry>
+			<Entry>libcap</Entry>
+			<Entry>librt</Entry>
+			<Entry>libm</Entry>
+			<Entry>libsystemd</Entry>
+			<Entry>libdl</Entry>
+			<Entry>libz</Entry>
+			<Entry>libc</Entry>
+			<Entry>libgcc_s</Entry>
+			<Entry>ld</Entry>			
+			<Entry>libmount</Entry>
+			<Entry>libblkid</Entry>
+			<Entry>libudev</Entry>
+			<Entry>libtinfo</Entry>
+		</LibsRoBindMounts>	                     		
+        </Rootfs>
+    </LxcConfig>
+</CONTAINER>

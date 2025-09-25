@@ -1,0 +1,12 @@
+[Unit]
+Description=Mount USB Drive on %i
+
+After=network-online.target systemd-timesyncd.service tr69hostif.service
+Requires=network-online.target tr69hostif.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStartPre=/bin/sleep 0.1
+ExecStart=/usr/sbin/usb-mount.sh add %i
+ExecStop=/usr/sbin/usb-mount.sh remove %i

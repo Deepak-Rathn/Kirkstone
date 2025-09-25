@@ -1,0 +1,224 @@
+diff --git a/WebKitBrowser/BrowserConsoleLog.h b/WebKitBrowser/BrowserConsoleLog.h
+index 7017253d..c238905c 100644
+--- a/WebKitBrowser/BrowserConsoleLog.h
++++ b/WebKitBrowser/BrowserConsoleLog.h
+@@ -20,7 +20,12 @@
+ #ifndef __BROWSERCONSOLELOG_H
+ #define __BROWSERCONSOLELOG_H
+
++#ifndef USE_THUNDER_R4
+ #include <tracing/tracing.h>
++#else
++#include <messaging/messaging.h>
++#endif
++
+ #ifndef WEBKIT_GLIB_API
+ #include "InjectedBundle/Utils.h"
+ #endif
+@@ -37,7 +42,11 @@ public:
+     BrowserConsoleLog(const string& prefix, const string& message, const uint64_t line, const uint64_t column)
+     {
+         _text = '[' + prefix + "][" + Core::NumberType<uint64_t>(line).Text() + ',' + Core::NumberType<uint64_t>(column).Text() + ']' + message;
++#ifndef USE_THUNDER_R4
+         const uint16_t maxStringLength = Trace::TRACINGBUFFERSIZE - 1;
++#else
++        const uint16_t maxStringLength = Messaging::MessageUnit::DataSize - 1;
++#endif
+         if (_text.length() > maxStringLength) {
+             _text = _text.substr(0, maxStringLength);
+         }
+@@ -46,7 +55,11 @@ public:
+     BrowserConsoleLog(const string& prefix, const WKStringRef message, const uint64_t line, const uint64_t column)
+     {
+         _text = '[' + prefix + "][" + Core::NumberType<uint64_t>(line).Text() + ',' + Core::NumberType<uint64_t>(column).Text() + ']' + WebKit::Utils::WKStringToString(message);
++#ifndef USE_THUNDER_R4
+         const uint16_t maxStringLength = Trace::TRACINGBUFFERSIZE - 1;
++#else
++        const uint16_t maxStringLength = Messaging::MessageUnit::DataSize - 1;
++#endif
+         if (_text.length() > maxStringLength) {
+             _text = _text.substr(0, maxStringLength);
+         }
+diff --git a/WebKitBrowser/CMakeLists.txt b/WebKitBrowser/CMakeLists.txt
+index 8d0ecf5b..fb570f8e 100644
+--- a/WebKitBrowser/CMakeLists.txt
++++ b/WebKitBrowser/CMakeLists.txt
+@@ -228,6 +228,13 @@ find_package(CompileSettingsDebug CONFIG REQUIRED)
+ find_package(WPEWebKit REQUIRED)
+ find_package(WPEBackend REQUIRED)
+
++if (USE_THUNDER_R4_4)
++    add_definitions(-DUSE_THUNDER_R4_4)
++    add_definitions(-DUSE_THUNDER_R4)
++elseif (USE_THUNDER_R4)
++    add_definitions(-DUSE_THUNDER_R4)
++endif ()
++
+ add_library(${MODULE_NAME} SHARED
+     Module.cpp
+     WebKitBrowser.cpp
+diff --git a/WebKitBrowser/Extension/Module.h b/WebKitBrowser/Extension/Module.h
+index d56663c0..b88ea353 100644
+--- a/WebKitBrowser/Extension/Module.h
++++ b/WebKitBrowser/Extension/Module.h
+@@ -25,7 +25,16 @@
+
+ #include <com/com.h>
+ #include <core/core.h>
+-#include <tracing/tracing.h>
++
++#ifndef USE_THUNDER_R4
++ #include <tracing/tracing.h>
++#else
++ #include <messaging/messaging.h>
++
++#undef SYSLOG
++#define SYSLOG TRACE_GLOBAL
++
++#endif
+
+ #undef EXTERNAL
+ #define EXTERNAL
+diff --git a/WebKitBrowser/Extension/main.cpp b/WebKitBrowser/Extension/main.cpp
+index f103001b..423afb11 100644
+--- a/WebKitBrowser/Extension/main.cpp
++++ b/WebKitBrowser/Extension/main.cpp
+@@ -91,7 +91,11 @@ public:
+             TRACE(Trace::Error, (_T("Could not open connection to node %s. Error: %s"), _comClient->Source().RemoteId(), Core::NumberType<uint32_t>(result).Text()));
+         } else {
+             // Due to the LXC container support all ID's get mapped. For the TraceBuffer, use the host given ID.
++#ifdef __CORE_MESSAGING__
++            Messaging::MessageUnit::Instance().Open(_comClient->ConnectionId());
++#else
+             Trace::TraceUnit::Instance().Open(_comClient->ConnectionId());
++#endif /* __CORE_MESSAGING__ */
+         }
+ 
+         _extension = WEBKIT_WEB_EXTENSION(g_object_ref(extension));
+diff --git a/WebKitBrowser/InjectedBundle/Module.h b/WebKitBrowser/InjectedBundle/Module.h
+index 574226dc..9020b236 100644
+--- a/WebKitBrowser/InjectedBundle/Module.h
++++ b/WebKitBrowser/InjectedBundle/Module.h
+@@ -24,7 +24,12 @@
+ 
+ #include <com/com.h>
+ #include <core/core.h>
++
++#ifndef USE_THUNDER_R4
+ #include <tracing/tracing.h>
++#else
++#include <messaging/messaging.h>
++#endif
+ 
+ #undef EXTERNAL
+ #define EXTERNAL
+diff --git a/WebKitBrowser/Module.h b/WebKitBrowser/Module.h
+index e04d3bb5..7ae37554 100644
+--- a/WebKitBrowser/Module.h
++++ b/WebKitBrowser/Module.h
+@@ -27,6 +27,16 @@
+ #include <core/core.h>
+ #include <plugins/plugins.h>
+ 
++#ifndef USE_THUNDER_R4
++#include <tracing/tracing.h>
++#else
++#include <messaging/messaging.h>
++
++#undef SYSLOG
++#define SYSLOG TRACE_GLOBAL
++
++#endif
++
+ #undef EXTERNAL
+ #define EXTERNAL
+ 
+diff --git a/WebKitBrowser/TimeZone/TimeZoneSupport.h b/WebKitBrowser/TimeZone/TimeZoneSupport.h
+index 4fccc24d..c65756ab 100644
+--- a/WebKitBrowser/TimeZone/TimeZoneSupport.h
++++ b/WebKitBrowser/TimeZone/TimeZoneSupport.h
+@@ -20,7 +20,7 @@
+ #ifndef __TIMEZONESUPPORTH
+ #define __TIMEZONESUPPORTH
+ 
+-#include "Module.h"
++#include "../Extension/Module.h"
+ #include <gio/gio.h>
+ 
+ namespace WPEFramework {
+diff --git a/WebKitBrowser/WebKitBrowser.cpp b/WebKitBrowser/WebKitBrowser.cpp
+index ebeffe17..79e901d0 100644
+--- a/WebKitBrowser/WebKitBrowser.cpp
++++ b/WebKitBrowser/WebKitBrowser.cpp
+@@ -120,7 +120,9 @@ namespace Plugin {
+             _cookieJar = _browser->QueryInterface<Exchange::IBrowserCookieJar>();
+             if (_cookieJar) {
+                 _cookieJar->Register(&_notification);
++#ifndef USE_THUNDER_R4
+                 Exchange::JBrowserCookieJar::Register(*this, _cookieJar);
++#endif
+             }
+ 
+             _browserScripting = _browser->QueryInterface<Exchange::IBrowserScripting>();
+@@ -152,7 +154,9 @@ namespace Plugin {
+             _browserScripting->Release();
+         }
+         if (_cookieJar) {
++#ifndef USE_THUNDER_R4
+             Exchange::JBrowserCookieJar::Unregister(*this);
++#endif
+             _cookieJar->Unregister(&_notification);
+             _cookieJar->Release();
+         }
+@@ -281,7 +285,12 @@ namespace Plugin {
+         if (path.empty() == false) {
+             string fullPath = _persistentStoragePath + path;
+             Core::Directory dir(fullPath.c_str());
+-            if (!dir.Destroy(true)) {
++#ifndef USE_THUNDER_R4
++            if (!dir.Destroy(true))
++#else
++            if (!dir.Destroy())
++#endif
++            {
+                 TRACE(Trace::Error, (_T("Failed to delete %s\n"), fullPath.c_str()));
+                 result = Core::ERROR_GENERAL;
+             }
+@@ -338,7 +347,9 @@ namespace Plugin {
+ 
+     void WebKitBrowser::CookieJarChanged()
+     {
++#ifndef USE_THUNDER_R4
+         Exchange::JBrowserCookieJar::Event::CookieJarChanged(*this);
++#endif
+     }
+ 
+     void WebKitBrowser::StateChange(const PluginHost::IStateControl::state state)
+@@ -464,7 +475,11 @@ namespace WebKitBrowser {
+             _children = Core::ProcessInfo::Iterator(_main.Id());
+             return ((_startTime == TimePoint::min()) || (_main.IsActive() == true) ? 1 : 0) + _children.Count();
+         }
++#ifdef USE_THUNDER_R4
++        virtual bool IsOperational() const override
++#else
+         const bool IsOperational() const override
++#endif
+         {
+             uint32_t requiredProcesses = 0;
+ 
+diff --git a/WebKitBrowser/WebKitImplementation.cpp b/WebKitBrowser/WebKitImplementation.cpp
+index 7b1053ff..0564c84f 100644
+--- a/WebKitBrowser/WebKitImplementation.cpp
++++ b/WebKitBrowser/WebKitImplementation.cpp
+@@ -2835,7 +2835,11 @@ static GSourceFuncs _handlerIntervention =
+             {
+                 virtual void Dispatch() { exit(1); }
+             };
++#ifndef USE_THUNDER_R4
+             Core::IWorkerPool::Instance().Submit(Core::proxy_cast<Core::IDispatch>(Core::ProxyType<ExitJob>::Create()));
++#else
++            Core::IWorkerPool::Instance().Submit(Core::ProxyType<Core::IDispatch>(Core::ProxyType<ExitJob>::Create()));
++#endif
+         }
+         static void closeCallback(VARIABLE_IS_NOT_USED WebKitWebView* webView, WebKitImplementation* browser)
+         {

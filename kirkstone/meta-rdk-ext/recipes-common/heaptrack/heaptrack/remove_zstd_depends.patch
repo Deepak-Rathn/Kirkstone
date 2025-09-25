@@ -1,0 +1,16 @@
+Index: git/src/track/heaptrack.sh.cmake
+===================================================================
+--- git.orig/src/track/heaptrack.sh.cmake
++++ git/src/track/heaptrack.sh.cmake
+@@ -283,11 +283,6 @@ output_suffix="gz"
+ COMPRESSOR="gzip -c"
+ UNCOMPRESSOR="gzip -dc"
+ 
+-if [ "@ZSTD_FOUND@" = "TRUE" ] && [ ! -z "$(command -v zstd 2> /dev/null)" ]; then
+-    output_suffix="zst"
+-    COMPRESSOR="zstd -c"
+-    UNCOMPRESSOR="zstd -dc"
+-fi
+ 
+ output_non_raw="$output.$output_suffix"
+ 

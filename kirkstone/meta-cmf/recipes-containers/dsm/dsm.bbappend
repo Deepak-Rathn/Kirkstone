@@ -1,0 +1,1 @@
+EXTRA_OECMAKE_remove_kirkstone =  " -DENABLE_RBUS_PROVIDER=ON"

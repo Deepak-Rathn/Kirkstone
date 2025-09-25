@@ -1,0 +1,32 @@
+From 309568a31dd79bb049f5ae885f2c97195395380c Mon Sep 17 00:00:00 2001
+From: Manigandan Gopalakrishnan <manigandan.gopalakrishnan@ltts.com>
+Date: Thu, 25 Jan 2024 20:15:39 +0530
+Subject: [PATCH] REFPLTB-2733: To provide IPv6 feed to connected client
+
+Reason for change: To enable source nat.
+Test procedure: Connected client to get IPv6 feed.
+Risks: Low
+
+Change-Id: I02ca4df0eaa5f73dfc931105c0d3a68cf5ca733c
+Signed-off-by: Manigandan Gopalakrishnan <manigandan.gopalakrishnan@ltts.com>
+---
+ source/firewall/firewall.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/source/firewall/firewall.c b/source/firewall/firewall.c
+index ee2a4243..4cdb108a 100644
+--- a/source/firewall/firewall.c
++++ b/source/firewall/firewall.c
+@@ -14445,6 +14445,9 @@ static void do_ipv6_nat_table(FILE* fp)
+ 			}
+ 		}
+    }
++#ifdef _PLATFORM_RASPBERRYPI_
++   fprintf(fp, "-A POSTROUTING -o %s -j MASQUERADE\n", current_wan_ifname);
++#endif
+     FIREWALL_DEBUG("Exiting do_ipv6_nat_table \n");
+ }
+ 
+-- 
+2.17.1
+

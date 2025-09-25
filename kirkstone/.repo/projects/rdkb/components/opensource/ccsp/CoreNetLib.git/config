@@ -1,0 +1,14 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+[user]
+	name = deepak.m
+	email = deepak.m@tataelxsi.co.in
+[filter "lfs"]
+	smudge = git-lfs smudge --skip -- %f
+	process = git-lfs filter-process --skip
+[remote "cmf"]
+	url = https://code.rdkcentral.com/r/rdkb/components/opensource/ccsp/CoreNetLib
+	review = https://code.rdkcentral.com/r/
+	projectname = rdkb/components/opensource/ccsp/CoreNetLib
+	fetch = +refs/heads/*:refs/remotes/cmf/*

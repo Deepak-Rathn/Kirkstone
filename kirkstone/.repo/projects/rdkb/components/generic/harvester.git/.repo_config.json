@@ -1,0 +1,32 @@
+{
+  "core.repositoryformatversion": [
+    "0"
+  ],
+  "core.filemode": [
+    "true"
+  ],
+  "user.name": [
+    "deepak.m"
+  ],
+  "user.email": [
+    "deepak.m@tataelxsi.co.in"
+  ],
+  "filter.lfs.smudge": [
+    "git-lfs smudge --skip -- %f"
+  ],
+  "filter.lfs.process": [
+    "git-lfs filter-process --skip"
+  ],
+  "remote.cmf.url": [
+    "https://code.rdkcentral.com/r/rdkb/components/generic/harvester"
+  ],
+  "remote.cmf.review": [
+    "https://code.rdkcentral.com/r/"
+  ],
+  "remote.cmf.projectname": [
+    "rdkb/components/generic/harvester"
+  ],
+  "remote.cmf.fetch": [
+    "+refs/heads/*:refs/remotes/cmf/*"
+  ]
+}

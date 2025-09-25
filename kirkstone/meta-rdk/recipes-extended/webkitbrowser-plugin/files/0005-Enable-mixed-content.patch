@@ -1,0 +1,46 @@
+From 3685115cb41117903ca62decf89b8226e3018248 Mon Sep 17 00:00:00 2001
+From: Filipe Norte <filipe.norte@sky.uk>
+Date: Mon, 20 Feb 2023 17:01:31 +0000
+Subject: [PATCH] Enable mixed content
+
+---
+ WebKitBrowser/WebKitImplementation.cpp | 13 +++++++------
+ 1 file changed, 7 insertions(+), 6 deletions(-)
+
+diff --git a/WebKitBrowser/WebKitImplementation.cpp b/WebKitBrowser/WebKitImplementation.cpp
+index 3a0b7c37..ad13c0e8 100644
+--- a/WebKitBrowser/WebKitImplementation.cpp
++++ b/WebKitBrowser/WebKitImplementation.cpp
+@@ -2992,13 +2992,13 @@ static GSourceFuncs _handlerIntervention =
+ #if WEBKIT_CHECK_VERSION(2, 38, 0)
+             g_object_set(G_OBJECT(preferences),
+                      "disable-web-security", !enableWebSecurity,
+-                     "allow-running-of-insecure-content", !enableWebSecurity,
+-                     "allow-display-of-insecure-content", !enableWebSecurity, nullptr);
++                     "allow-running-of-insecure-content", true,
++                     "allow-display-of-insecure-content", true, nullptr);
+ #else
+             g_object_set(G_OBJECT(preferences),
+                      "enable-websecurity", enableWebSecurity,
+-                     "allow-running-of-insecure-content", !enableWebSecurity,
+-                     "allow-display-of-insecure-content", !enableWebSecurity, nullptr);
++                     "allow-running-of-insecure-content", true,
++                     "allow-display-of-insecure-content", true, nullptr);
+ #endif
+             _view = WEBKIT_WEB_VIEW(g_object_new(WEBKIT_TYPE_WEB_VIEW,
+                 "backend", webkit_web_view_backend_new(wpe_view_backend_create(), nullptr, nullptr),
+@@ -3159,8 +3159,9 @@ static GSourceFuncs _handlerIntervention =
+ 
+             // Allow mixed content.
+             bool allowMixedContent = _config.Secure.Value();
+-            WKPreferencesSetAllowRunningOfInsecureContent(preferences, !allowMixedContent);
+-            WKPreferencesSetAllowDisplayOfInsecureContent(preferences, !allowMixedContent);
++            // Temporary enabled until APV migrated to HTTPS
++            WKPreferencesSetAllowRunningOfInsecureContent(preferences, true);
++            WKPreferencesSetAllowDisplayOfInsecureContent(preferences, true);
+ 
+             // WebSecurity
+             WKPreferencesSetWebSecurityEnabled(preferences, allowMixedContent);
+-- 
+2.39.1
+

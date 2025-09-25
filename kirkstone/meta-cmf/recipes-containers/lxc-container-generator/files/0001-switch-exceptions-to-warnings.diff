@@ -1,0 +1,69 @@
+Source: COMCAST
+Upstream-Status: N/A,as the patch is specific to Comcast and Video Accelerators
+From: Lakshmipriya <LakshmipriyaLakshmipriya_Purushan@cable.comcast.com>
+---
+
+diff --git a/src/lib/config.py b/src/lib/config.py
+index 713bde1..b191262 100644
+--- a/src/lib/config.py
++++ b/src/lib/config.py
+@@ -234,7 +234,8 @@ class cConfig(object):
+ 
+                     if (self.sanityCheck.validateTextEntry(source) and self.sanityCheck.validateTextEntry(destination)):
+ 
+-                        self.sanityCheck.validateMountBind(source.text, options)
++                        if (not self.sanityCheck.validateMountBind(source.text, options)):
++                            continue
+                         self.sanityCheck.validateOptions(source.text, fsType, options)
+                         if(source.text == destination.text):
+                             if(not self.sanityCheck.checkNestedMountBinds(source.text)):
+@@ -298,7 +299,8 @@ class cConfig(object):
+                                                                                         source)
+                             self.rootfs.createMountPointForFile(source)
+                         else:
+-                            raise Exception("[!!! ERROR !!!] Rootfs does not contain (%s) - No such file or directory"%(source))
++                            #raise Exception("[!!! ERROR !!!] Rootfs does not contain (%s) - No such file or directory"%(source))
++                            print("[!!! ERROR !!!] Rootfs does not contain (%s) - No such file or directory"%(source))
+         return entry
+ 
+     def generateHardlinks(self, libHardlinksNode):
+@@ -311,7 +313,8 @@ class cConfig(object):
+                         if self.sanityCheck.pathExist(source):
+                             self.rootfs.createHardlinkForFile(source)
+                         else:
+-                            raise Exception("[!!! ERROR !!!] Rootfs does not contain (%s) - No such file or directory"%(source))
++                            #raise Exception("[!!! ERROR !!!] Rootfs does not contain (%s) - No such file or directory"%(source))
++                            print("[!!! ERROR !!!] Rootfs does not contain (%s) - No such file or directory"%(source))
+ 
+     def createRootfsConf(self, rootfsNode):
+ 
+diff --git a/src/lib/rootfs.py b/src/lib/rootfs.py
+index db15768..1b428fc 100644
+--- a/src/lib/rootfs.py
++++ b/src/lib/rootfs.py
+@@ -256,7 +256,8 @@ class cRootfs(object):
+                         lib.append(val["path"])
+ 
+         if not lib:
+-            raise Exception("[!!! FIND  !!!] Rootfs does not contain (%s) - No such file or directory"%(libName))
++            #raise Exception("[!!! FIND  !!!] Rootfs does not contain (%s) - No such file or directory"%(libName))
++            print("[!!! FIND  !!!] Rootfs does not contain (%s) - No such file or directory"%(libName))
+ 
+         return lib
+ 
+diff --git a/src/lib/sanity_check.py b/src/lib/sanity_check.py
+index c7d64a7..a9d6e2c 100644
+--- a/src/lib/sanity_check.py
++++ b/src/lib/sanity_check.py
+@@ -228,7 +228,10 @@ class cSanityCheck(object):
+ 
+     def validateMountBind(self, mountBind, options):
+         if (self.isWritable(mountBind) and (options.find("optional") == -1) and not self.pathExist(mountBind)):
+-            raise Exception("[!!! ERROR !!!] Rootfs does not contain (%s) - No such file or directory"%(mountBind))
++            #raise Exception("[!!! ERROR !!!] Rootfs does not contain (%s) - No such file or directory"%(mountBind))
++            return False
++        else:
++            return True
+ 
+     def addDir(self, dir):
+         self.dirList.append(dir)
