@@ -1,0 +1,13 @@
+[Unit]
+Description=Sample RDK-B third-party demo app
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/sampleapp
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

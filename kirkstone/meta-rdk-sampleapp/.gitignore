@@ -1,0 +1,9 @@
+# Editor/OS
+.DS_Store
+*.swp
+*.swo
+
+# Yocto build artifacts that might be dropped if building inside the layer (not recommended)
+tmp/
+sstate-cache/
+patches/series
