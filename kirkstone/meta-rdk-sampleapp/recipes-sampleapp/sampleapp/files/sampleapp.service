@@ -8,6 +8,8 @@ Type=simple
 ExecStart=/usr/bin/sampleapp
 Restart=on-failure
 RestartSec=5s
+# Basic hardening; adjust for real app needs
+NoNewPrivileges=true
 
 [Install]
 WantedBy=multi-user.target

@@ -27,6 +27,10 @@ How to include in your image:
 - Add `packagegroup-meta-rdk-sampleapp` to IMAGE_INSTALL, for example via local.conf:
   IMAGE_INSTALL:append = " packagegroup-meta-rdk-sampleapp"
 - Alternatively, add a bbappend for your target image to include the packagegroup.
+- To avoid “system has not been booted with systemd” during image build on CI/hosts:
+  - Include the provided distro include in your config:
+      require conf/distro/include/meta-rdk-sampleapp.inc
+  - This defers systemd enablement to first boot on target while keeping systemd as the target init.
 
 Directory summary:
 - conf/layer.conf           : Layer configuration (already present)

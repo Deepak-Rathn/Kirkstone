@@ -131,6 +131,9 @@ Follow this sequence to replace the sample app with your real application.
   - Supply a proper service unit file and install it in do_install to ${systemd_system_unitdir}.
   - Ensure SYSTEMD_SERVICE:${PN} includes the correct service filename.
   - Consider whether to auto-enable on boot (SYSTEMD_AUTO_ENABLE:${PN} = "enable") or leave disabled for manual control.
+  - Important: To avoid “System has not been booted with systemd” errors during image build on CI/hosts, include:
+        require conf/distro/include/meta-rdk-sampleapp.inc
+    This defers systemd enablement to target first-boot while keeping systemd as the target init system.
 
 ### 4) RDK-B integration hooks
 - Utopia/CCSP integration:

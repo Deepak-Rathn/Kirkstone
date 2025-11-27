@@ -18,6 +18,11 @@ SRC_URI = "\
 S = "${WORKDIR}"
 
 inherit pkgconfig systemd
+# Important:
+# - This recipe installs a systemd unit only when PACKAGECONFIG includes 'systemd'.
+# - No systemctl invocations are performed during do_install; enabling is handled by
+#   packaging metadata and deferred to target first-boot by the distro include, to
+#   avoid build-time errors on hosts not booted with systemd.
 
 # Provide systemd support via PACKAGECONFIG toggle
 PACKAGECONFIG ??= "systemd"
