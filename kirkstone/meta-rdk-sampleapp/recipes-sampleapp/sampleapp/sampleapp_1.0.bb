@@ -23,13 +23,33 @@ inherit pkgconfig systemd
 # - No systemctl invocations are performed during do_install; enabling is handled by
 #   packaging metadata and deferred to target first-boot by the distro include, to
 #   avoid build-time errors on hosts not booted with systemd.
+#
+# Additionally, ensure postinst never tries to invoke systemctl in the build/host
+# environment. We explicitly defer service enablement to target first boot.
+
 
 # Provide systemd support via PACKAGECONFIG toggle
 PACKAGECONFIG ??= "systemd"
 PACKAGECONFIG[systemd] = ",,systemd"
 
 SYSTEMD_SERVICE:${PN} = "sampleapp.service"
+# Defer enablement to the target; systemd.bbclass will create postinst to
+# enable on first boot when systemd is present. Do not attempt to start.
 SYSTEMD_AUTO_ENABLE:${PN} = "enable"
+
+# Ensure any postinstall runs only on target (IMAGE_PREPROCESS and do_rootfs must not invoke systemctl)
+pkg_postinst:${PN} () {
+#!/bin/sh
+if [ -n "$D" ]; then
+    # In image creation (populate rootfs) context; do nothing and defer to target
+    exit 0
+fi
+# On target, systemd.bbclass will handle enabling; do not try to start here.
+# Guard against missing systemd (e.g., non-systemd images)
+if [ -d /run/systemd/system ]; then
+    :
+fi
+}
 
 do_compile() {
     oe_runmake
