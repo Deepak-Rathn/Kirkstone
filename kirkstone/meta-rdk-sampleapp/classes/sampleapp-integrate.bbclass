@@ -4,6 +4,9 @@
 
 inherit systemd
 
+# Note: Do not add any install/postinst hooks here that invoke `systemctl` directly.
+# The systemd.bbclass will handle service enablement on first boot on target.
+
 # PUBLIC_INTERFACE
 python () {
     """

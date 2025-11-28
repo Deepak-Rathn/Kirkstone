@@ -22,10 +22,12 @@ inherit pkgconfig systemd
 # - This recipe installs a systemd unit only when PACKAGECONFIG includes 'systemd'.
 # - No systemctl invocations are performed during do_install; enabling is handled by
 #   packaging metadata and deferred to target first-boot by the distro include, to
-#   avoid build-time errors on hosts not booted with systemd.
+#   avoid build-time errors on hosts not booted with systemd or when running in
+#   containerized build environments without systemd (e.g., CI containers).
 #
 # Additionally, ensure postinst never tries to invoke systemctl in the build/host
-# environment. We explicitly defer service enablement to target first boot.
+# environment. We explicitly defer service enablement to target first boot. The
+# postinst is guarded with `$D` checks so it will NO-OP during do_rootfs/imaqe.
 
 
 # Provide systemd support via PACKAGECONFIG toggle
@@ -40,15 +42,19 @@ SYSTEMD_AUTO_ENABLE:${PN} = "enable"
 # Ensure any postinstall runs only on target (IMAGE_PREPROCESS and do_rootfs must not invoke systemctl)
 pkg_postinst:${PN} () {
 #!/bin/sh
+# Never perform service actions during image creation stage.
 if [ -n "$D" ]; then
-    # In image creation (populate rootfs) context; do nothing and defer to target
     exit 0
 fi
-# On target, systemd.bbclass will handle enabling; do not try to start here.
-# Guard against missing systemd (e.g., non-systemd images)
+
+# On target: do not start/stop services here. Enabling is handled by systemd.bbclass
+# if systemd is present. Guard for non-systemd targets as well.
 if [ -d /run/systemd/system ]; then
+    # Nothing to do; enablement is performed by packaged postinst snippets from systemd.bbclass.
     :
 fi
+
+exit 0
 }
 
 do_compile() {
